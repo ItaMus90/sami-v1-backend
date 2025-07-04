@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  sami-v1-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      TEST: "test"
+#      MONGODB_URI: "YOUR_MONGODB_ATLAS_CONNECTION_STRING"
+#      JWT_SECRET: "YOUR_SUPER_SECURE_JWT_SECRET_HERE" # Use a strong, random string
+#     FRONTEND_URL: "http://localhost:3001"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    # depends_on:
+      #   - mongo # Uncomment if you were running a local MongoDB container, not needed for MongoDB Atlas
+    restart: always
