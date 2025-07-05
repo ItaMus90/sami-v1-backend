@@ -6,6 +6,7 @@ import { CompaniesModule } from './companies/companies.module';
 import {ConfigModule} from '@nestjs/config';
 import * as process from 'node:process';
 import {MongooseModule} from '@nestjs/mongoose';
+import { PlatformsModule } from './platforms/platforms.module';
 
 @Module({
   imports: [
@@ -14,7 +15,8 @@ import {MongooseModule} from '@nestjs/mongoose';
       }),
       MongooseModule.forRoot(process.env.MONGODB_URI || 'mongodb://localhost:27017/test'
       ),
-      CompaniesModule
+      CompaniesModule,
+      PlatformsModule
   ],
   controllers: [AppController],
   providers: [AppService],

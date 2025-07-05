@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import {ConflictException, Injectable, OnModuleInit} from '@nestjs/common';
 import {InjectModel} from '@nestjs/mongoose';
 import {Company, CompanyDocument} from './schemas/company.schema';
 import {Model} from 'mongoose';
@@ -6,14 +6,36 @@ import {CreateCompanyDto} from './dto/create-company.dto';
 import {UpdateCompanyDto} from './dto/update-company.dto';
 
 @Injectable()
-export class CompaniesService {
+export class CompaniesService implements OnModuleInit {
     constructor(
         @InjectModel(Company.name) private companyModel: Model<CompanyDocument>
     ) {}
 
+    async onModuleInit(){
+        await this.companyModel.createIndexes();
+        await this.checkIndexes();
+    }
+
+    async checkIndexes() {
+        const indexes = await this.companyModel.collection.indexes();
+        const nameIndex = indexes.find(index =>
+            index.key && index.key.name === 1 && index.unique === true
+        );
+        if (!nameIndex){
+            console.log('Unique index on name field is missing!');
+        }
+    }
+
     async create(createCompanyDto: CreateCompanyDto): Promise<Company> {
-        const createCompany = new this.companyModel(createCompanyDto);
-        return createCompany.save();
+        try {
+            const createCompany = new this.companyModel(createCompanyDto);
+            return await createCompany.save();
+        }catch (error) {
+            if (error.code === 11000) {
+                throw new ConflictException('Company with this name already exists');
+            }
+            throw error;
+        }
     }
 
     async findAll(): Promise<Company[]> {
